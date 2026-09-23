@@ -1,0 +1,45 @@
+﻿
+body {
+    background-color: #f4f6f9;
+    font-family: Arial, sans-serif;
+}
+
+.navbar {
+    padding: 15px 0;
+}
+
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.card-header {
+    padding: 18px;
+    border-bottom: 1px solid #eee;
+}
+
+.table th {
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.table td {
+    vertical-align: middle;
+    font-size: 14px;
+}
+
+.payroll-result {
+    background-color: #f0fff4;
+    border: 1px solid #b7e4c7;
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+    .payroll-result p {
+        margin-bottom: 8px;
+    }
+
+#resultTakeHomePay {
+    font-weight: bold;
+}

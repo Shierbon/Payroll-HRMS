@@ -14,13 +14,16 @@ namespace PayrollHrms.Controllers
     {
         private readonly PayrollHrmsDbContext _context;
         private readonly EmployeeNumberService _employeeNumberService;
+        private readonly PayrollService _payrollService;
 
         public EmployeesController(
             PayrollHrmsDbContext context,
-            EmployeeNumberService employeeNumberService)
+            EmployeeNumberService employeeNumberService,
+            PayrollService payrollService)
         {
             _context = context;
             _employeeNumberService = employeeNumberService;
+            _payrollService = payrollService;
         }
 
         [HttpPost]
@@ -90,10 +93,50 @@ namespace PayrollHrms.Controllers
             return NoContent();
         }
 
+        [HttpPost("{id:int}/compute-pay")]
+        public async Task<ActionResult<PayrollResultDto>> ComputePay(int id,ComputePayrollDto request)
+        {
+            // Validate required payroll dates.
+            if (!request.StartDate.HasValue ||
+                !request.EndDate.HasValue)
+            {
+                return BadRequest(
+                    "Start date and end date are required.");
+            }
+
+            // Validate the payroll period.
+            if (request.StartDate.Value.Date >
+                request.EndDate.Value.Date)
+            {
+                return BadRequest(
+                    "Start date cannot be greater than end date.");
+            }
+
+            // Retrieve employee from SQL Server.
+            var employee = await _context.Employees
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            if (employee == null)
+            {
+                return NotFound("Employee not found.");
+            }
+
+            // Compute employee take-home pay.
+            var result = _payrollService.ComputePay(
+                employee,
+                request.StartDate.Value,
+                request.EndDate.Value);
+
+            // Return the payroll result.
+            return Ok(result);
+        }
+
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Employee>>> GetEmployees()
         {
             var employees = await _context.Employees
+                .FromSqlRaw("EXEC dbo.uspGetEmployees")
                 .AsNoTracking()
                 .ToListAsync();
 
